@@ -1,0 +1,78 @@
+[
+  {
+    "address": "345tgrefgety6543",
+    "status": "done",
+    "flag": "green",
+    "date": "2025-06-13T15:52:25.026Z",
+    "summary": "Checked 345tgrefgety6543 at 2025-06-13T15:52:25.026Z",
+    "connected": [
+      {
+        "address": "0xabc123",
+        "hop": 1,
+        "prob": 95,
+        "labels": [
+          "Mixer"
+        ],
+        "flag": "red"
+      },
+      {
+        "address": "0xdef456",
+        "hop": 2,
+        "prob": 70,
+        "labels": [
+          "Gambling"
+        ],
+        "flag": "green"
+      }
+    ],
+    "transactions": [
+      {
+        "ts": 1749829945,
+        "value": 0.68037627898285
+      },
+      {
+        "ts": 1749829945,
+        "value": 0.995727420116846
+      }
+    ],
+    "chat": []
+  },
+  {
+    "address": "345gref345t6ht",
+    "status": "done",
+    "flag": "green",
+    "date": "2025-06-13T15:52:34.612Z",
+    "summary": "Checked 345gref345t6ht at 2025-06-13T15:52:34.612Z",
+    "connected": [
+      {
+        "address": "0xabc123",
+        "hop": 1,
+        "prob": 95,
+        "labels": [
+          "Mixer"
+        ],
+        "flag": "red"
+      },
+      {
+        "address": "0xdef456",
+        "hop": 2,
+        "prob": 70,
+        "labels": [
+          "Gambling"
+        ],
+        "flag": "green"
+      }
+    ],
+    "transactions": [
+      {
+        "ts": 1749829954,
+        "value": 1.8519947660064067
+      },
+      {
+        "ts": 1749829954,
+        "value": 0.04932802313543383
+      }
+    ],
+    "chat": []
+  }
+]
