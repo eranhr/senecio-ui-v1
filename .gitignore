@@ -1,0 +1,35 @@
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg
+*.egg-info/
+dist/
+build/
+.env
+.venv/
+env/
+venv/
+*.pyo
+.Python
+
+# Swift
+.DS_Store
+.build/
+Packages/
+xcuserdata/
+*.xcuserstate
+*.xcodeproj/*
+*.swiftpm/
+DerivedData/
+
+# General
+.idea/
+.vscode/
+*.log
