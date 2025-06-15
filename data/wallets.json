@@ -2,9 +2,40 @@
   {
     "address": "345tgrefgety6543",
     "status": "done",
-    "flag": "green",
-    "date": "2025-06-13T15:52:25.026Z",
-    "summary": "Checked 345tgrefgety6543 at 2025-06-13T15:52:25.026Z",
+    "flag": "red",
+    "date": "2025-06-15T12:42:15.882Z",
+    "summary": "Checked 345tgrefgety6543 at 2025-06-15T12:42:15.882Z",
+    "categories": [
+      "Mixer",
+      "High-Risk"
+    ],
+    "potentialCategories": [
+      {
+        "category": "Gambling",
+        "prob": 0.72
+      },
+      {
+        "category": "Crowd Funding",
+        "prob": 0.65
+      }
+    ],
+    "behavesLike": [
+      {
+        "address": "0xAAA111",
+        "prob": 0.89,
+        "categories": [
+          "Mixer"
+        ]
+      },
+      {
+        "address": "0xBBB222",
+        "prob": 0.77,
+        "categories": [
+          "Exchange",
+          "High-Risk"
+        ]
+      }
+    ],
     "connected": [
       {
         "address": "0xabc123",
@@ -27,15 +58,14 @@
     ],
     "transactions": [
       {
-        "ts": 1749829945,
-        "value": 0.68037627898285
+        "ts": 1749987735,
+        "value": 1.23
       },
       {
-        "ts": 1749829945,
-        "value": 0.995727420116846
+        "ts": 1749991335,
+        "value": 0.78
       }
-    ],
-    "chat": []
+    ]
   },
   {
     "address": "345gref345t6ht",
@@ -74,5 +104,141 @@
       }
     ],
     "chat": []
+  },
+  {
+    "address": "897t6yfghvbji987uy",
+    "status": "done",
+    "flag": "red",
+    "date": "2025-06-15T12:43:30.961Z",
+    "summary": "Checked 897t6yfghvbji987uy at 2025-06-15T12:43:30.961Z",
+    "categories": [
+      "Mixer",
+      "High-Risk"
+    ],
+    "potentialCategories": [
+      {
+        "category": "Gambling",
+        "prob": 0.72
+      },
+      {
+        "category": "Crowd Funding",
+        "prob": 0.65
+      }
+    ],
+    "behavesLike": [
+      {
+        "address": "0xAAA111",
+        "prob": 0.89,
+        "categories": [
+          "Mixer"
+        ]
+      },
+      {
+        "address": "0xBBB222",
+        "prob": 0.77,
+        "categories": [
+          "Exchange",
+          "High-Risk"
+        ]
+      }
+    ],
+    "connected": [
+      {
+        "address": "0xabc123",
+        "hop": 1,
+        "prob": 95,
+        "labels": [
+          "Mixer"
+        ],
+        "flag": "red"
+      },
+      {
+        "address": "0xdef456",
+        "hop": 2,
+        "prob": 70,
+        "labels": [
+          "Gambling"
+        ],
+        "flag": "green"
+      }
+    ],
+    "transactions": [
+      {
+        "ts": 1749987810,
+        "value": 1.23
+      },
+      {
+        "ts": 1749991410,
+        "value": 0.78
+      }
+    ]
+  },
+  {
+    "address": "32456hytrgefwr456",
+    "status": "done",
+    "flag": "green",
+    "date": "2025-06-15T12:42:35.595Z",
+    "summary": "Checked 32456hytrgefwr456 at 2025-06-15T12:42:35.595Z",
+    "categories": [
+      "Mixer",
+      "High-Risk"
+    ],
+    "potentialCategories": [
+      {
+        "category": "Gambling",
+        "prob": 0.72
+      },
+      {
+        "category": "Crowd Funding",
+        "prob": 0.65
+      }
+    ],
+    "behavesLike": [
+      {
+        "address": "0xAAA111",
+        "prob": 0.89,
+        "categories": [
+          "Mixer"
+        ]
+      },
+      {
+        "address": "0xBBB222",
+        "prob": 0.77,
+        "categories": [
+          "Exchange",
+          "High-Risk"
+        ]
+      }
+    ],
+    "connected": [
+      {
+        "address": "0xabc123",
+        "hop": 1,
+        "prob": 95,
+        "labels": [
+          "Mixer"
+        ],
+        "flag": "red"
+      },
+      {
+        "address": "0xdef456",
+        "hop": 2,
+        "prob": 70,
+        "labels": [
+          "Gambling"
+        ],
+        "flag": "green"
+      }
+    ],
+    "transactions": [
+      {
+        "ts": 1749987755,
+        "value": 1.23
+      },
+      {
+        "ts": 1749991355,
+        "value": 0.78
+      }
+    ]
   }
 ]

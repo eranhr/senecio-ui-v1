@@ -3,17 +3,19 @@
 <head>
   <meta charset="UTF-8"/>
   <title>AML Dashboard</title>
-  <!-- Tailwind for styling -->
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Chart.js for transaction charts -->
+  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body class="flex h-screen bg-gray-900 text-gray-200">
 
   <!-- SIDEBAR -->
-  <aside id="sidebar" class="w-64 flex-shrink-0 bg-gray-800 p-4 flex flex-col border-r border-gray-700">
+  <aside id="sidebar"
+         class="w-64 flex-shrink-0 bg-gray-800 p-4 flex flex-col border-r border-gray-700">
     <h2 class="text-xl font-semibold text-teal-300 mb-4">Wallets To Detect</h2>
 
+    <!-- Add wallet -->
     <div id="add-row" class="flex flex-wrap gap-2 mb-4">
       <input id="txtAdd"
              class="flex-1 min-w-[0] bg-gray-700 border border-gray-600 rounded px-2 py-1 focus:outline-none"
@@ -24,31 +26,55 @@
       </button>
     </div>
 
-    <input type="file" id="fileInput" class="mb-4 text-sm text-gray-400 w-full"/>
+    <!-- CSV/TXT import -->
+    <input type="file" id="fileInput" accept=".csv,.txt"
+           class="mb-4 text-sm text-gray-400 w-full"/>
 
+    <!-- JSON import -->
+    <div class="flex gap-2 mb-4">
+      <button id="btnImportJSON"
+              class="bg-gray-700 hover:bg-gray-600 text-gray-200 px-2 py-1 rounded">
+        Import JSON
+      </button>
+      <input type="file" id="importJSONInput" accept=".json" class="hidden"/>
+    </div>
+
+    <!-- Export CSV/JSON -->
+    <div class="flex gap-2 mb-4">
+      <button id="btnExportCSV"
+              class="bg-gray-700 hover:bg-gray-600 text-gray-200 px-2 py-1 rounded">
+        Export CSV
+      </button>
+      <button id="btnExportJSON"
+              class="bg-gray-700 hover:bg-gray-600 text-gray-200 px-2 py-1 rounded">
+        Export JSON
+      </button>
+    </div>
+
+    <!-- Wallet list -->
     <div id="wallets" class="flex-1 overflow-auto">
       <ul id="list" class="space-y-1"></ul>
     </div>
   </aside>
 
-  <!-- MAIN: DETAILS + CHAT -->
+  <!-- DETAILS + CHAT -->
   <main class="flex-1 flex gap-6 p-6">
-
-    <!-- DETAILS pane -->
-    <section id="details" class="flex-1 bg-gray-800 rounded-lg p-6 overflow-auto">
+    <section id="details"
+             class="flex-1 bg-gray-800 rounded-lg p-6 overflow-auto">
       <h3 id="detailTitle" class="text-2xl font-semibold mb-2">Select a wallet</h3>
       <p id="detailSummary" class="text-gray-300">(no summary yet)</p>
-      <!-- Transaction chart will be injected here -->
+      <!-- tables, chart & new sections will be injected here -->
     </section>
 
-    <!-- CHAT pane -->
-    <section id="chat" class="flex-1 flex flex-col bg-gray-800 rounded-lg p-6">
+    <section id="chat"
+             class="flex-1 flex flex-col bg-gray-800 rounded-lg p-6">
       <div id="history" class="flex-1 overflow-auto space-y-2 mb-4"></div>
       <div id="chat-input" class="flex gap-2">
         <input id="chatTxt"
                class="flex-1 bg-gray-700 border border-gray-600 rounded px-3 py-2 focus:outline-none"
                placeholder="ask a question"/>
-        <button id="chatBtn" class="bg-teal-400 hover:bg-teal-500 text-gray-900 font-medium px-4 rounded">
+        <button id="chatBtn"
+                class="bg-teal-400 hover:bg-teal-500 text-gray-900 font-medium px-4 rounded">
           Send
         </button>
       </div>
@@ -58,40 +84,93 @@
   <!-- APP SCRIPT -->
   <script>
   (async function(){
-    // --- Helpers for API calls ---
+    // --- API helpers ---
     async function loadWallets() {
-      const r = await fetch('/api/wallets');
-      return r.json();
+      const r = await fetch('/api/wallets'); return r.json();
     }
     async function saveWallets(ws) {
-      await fetch('/api/wallets', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(ws) });
+      await fetch('/api/wallets', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify(ws)
+      });
     }
     async function loadChat(addr) {
       const r = await fetch(`/api/chat/${addr}`); return r.json();
     }
     async function saveChat(addr,msgs) {
-      await fetch(`/api/chat/${addr}`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(msgs) });
+      await fetch(`/api/chat/${addr}`, {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify(msgs)
+      });
     }
 
     // --- State & DOM refs ---
     let wallets    = await loadWallets();
     let activeAddr = null;
-    const listEl    = document.getElementById('list');
-    const txtAdd    = document.getElementById('txtAdd');
-    const btnAdd    = document.getElementById('btnAdd');
-    const fileInput = document.getElementById('fileInput');
-    const details   = { title: document.getElementById('detailTitle'), summary: document.getElementById('detailSummary') };
+    const listEl          = document.getElementById('list');
+    const txtAdd          = document.getElementById('txtAdd');
+    const btnAdd          = document.getElementById('btnAdd');
+    const fileInput       = document.getElementById('fileInput');
+    const btnImportJSON   = document.getElementById('btnImportJSON');
+    const importJSONInput = document.getElementById('importJSONInput');
+    const btnExportCSV    = document.getElementById('btnExportCSV');
+    const btnExportJSON   = document.getElementById('btnExportJSON');
+    const details         = {
+      title:   document.getElementById('detailTitle'),
+      summary: document.getElementById('detailSummary')
+    };
     const historyEl = document.getElementById('history');
     const chatTxt   = document.getElementById('chatTxt');
     const chatBtn   = document.getElementById('chatBtn');
+    const det       = document.getElementById('details');
 
-    // --- renderList with status & actions ---
+    // --- Import/Export handlers ---
+    btnExportCSV.onclick = () => {
+      const csv = wallets.map(w=>w.address).join('\n');
+      const blob = new Blob([csv], {type:'text/csv'});
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href = url; a.download = 'wallets.csv'; a.click();
+      URL.revokeObjectURL(url);
+    };
+    btnExportJSON.onclick = () => {
+      const json = JSON.stringify(wallets, null,2);
+      const blob = new Blob([json], {type:'application/json'});
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href = url; a.download = 'wallets.json'; a.click();
+      URL.revokeObjectURL(url);
+    };
+    btnImportJSON.onclick = () => importJSONInput.click();
+    importJSONInput.onchange = e => {
+      const f = e.target.files[0]; if(!f) return;
+      const r = new FileReader();
+      r.onload = () => {
+        try {
+          const imported = JSON.parse(r.result);
+          if (!Array.isArray(imported)) throw 0;
+          wallets = imported;
+          saveWallets(wallets);
+          renderList();
+          activeAddr = null;
+          details.title.textContent   = 'Select a wallet';
+          details.summary.textContent = '(no summary yet)';
+          historyEl.innerHTML = '';
+        } catch {
+          alert('Invalid JSON file');
+        }
+      };
+      r.readAsText(f);
+    };
+
+    // --- Core render & actions ---
     async function rerunCheck(addr) {
       wallets = wallets.map(w => w.address===addr ? {...w, status:'in-progress'} : w);
       renderList();
-      // simulate delay
-      await new Promise(r=>setTimeout(r, 2000));
-      const res = await fetch(`/api/check/${addr}`,{ method:'POST' });
+      await new Promise(r=>setTimeout(r,2000));
+      const res = await fetch(`/api/check/${addr}`,{method:'POST'});
       const updated = await res.json();
       wallets = wallets.map(w => w.address===addr ? updated : w);
       await saveWallets(wallets);
@@ -115,82 +194,164 @@
       wallets.forEach(w => {
         const li = document.createElement('li');
         li.className = 'flex items-center justify-between p-2 rounded hover:bg-gray-700';
-        // left: status dot + address
+
+        // left: dot + address
         const left = document.createElement('div');
-        const dot = w.status==='in-progress' ? 'bg-yellow-400' : w.status==='done' ? (w.flag==='red'?'bg-red-500':'bg-green-500') : 'bg-gray-500';
-        left.innerHTML = `<span class="inline-block w-2 h-2 mr-2 rounded-full ${dot}"></span><span class="truncate">${w.address}</span>`;
+        const dot = w.status==='in-progress'
+          ? 'bg-yellow-400'
+          : w.status==='done'
+            ? (w.flag==='red'?'bg-red-500':'bg-green-500')
+            : 'bg-gray-500';
+        left.innerHTML = `
+          <span class="inline-block w-2 h-2 mr-2 rounded-full ${dot}"></span>
+          <span class="truncate">${w.address}</span>
+        `;
         left.classList.add('flex','items-center','gap-1','flex-1','cursor-pointer');
         left.onclick = ()=> selectWallet(w.address);
-        // right: buttons
+
+        // buttons
         const btns = document.createElement('div');
         btns.className = 'flex gap-2 flex-shrink-0';
-        btns.innerHTML = `<button class="p-1 hover:bg-gray-600 rounded" title="Rerun">⟳</button><button class="p-1 hover:bg-gray-600 rounded" title="Remove">🗑</button>`;
+        btns.innerHTML = `
+          <button class="p-1 hover:bg-gray-600 rounded" title="Rerun">⟳</button>
+          <button class="p-1 hover:bg-gray-600 rounded" title="Remove">🗑</button>
+        `;
         btns.children[0].onclick = ()=> rerunCheck(w.address);
         btns.children[1].onclick = ()=> removeWallet(w.address);
+
         li.append(left, btns);
         listEl.append(li);
       });
-      saveWallets(wallets);
     }
 
-    // --- selectWallet shows summary, connected table, transaction chart, chat ---
     async function selectWallet(addr) {
       activeAddr = addr;
       let w = wallets.find(w=>w.address===addr);
-      // auto-run if new
-      if (w.status==='new') { await rerunCheck(addr); w = wallets.find(w=>w.address===addr); }
 
-      // Summary
+      // auto-run if new
+      if (w.status==='new') {
+        await rerunCheck(addr);
+        w = wallets.find(w=>w.address===addr);
+      }
+
+      // summary
       details.title.textContent   = w.address;
       details.summary.textContent = w.summary || '(no summary yet)';
 
-      // Clear old tables & canvas
-      const det = document.getElementById('details');
-      det.querySelectorAll('table, canvas').forEach(el => el.remove());
+      // clear old inserts
+      det.querySelectorAll('table, canvas, .mb-4').forEach(el => {
+        if (!['detailTitle','detailSummary'].includes(el.id)) el.remove();
+      });
 
-      // Connected wallets table
+      // connected table (if any)
       if (Array.isArray(w.connected) && w.connected.length) {
-        const connHtml = `<table class="w-full text-sm text-left mb-4"><thead><tr><th>Address</th><th>Hop</th><th>%</th><th>Labels</th><th>Flag</th></tr></thead><tbody>${w.connected.map(c=>`<tr><td>${c.address}</td><td>${c.hop}</td><td>${c.prob}%</td><td>${c.labels.join(', ')}</td><td><span class="inline-block w-2 h-2 rounded-full ${c.flag==='red'?'bg-red-500':'bg-green-500'}"></span></td></tr>`).join('')}</tbody></table>`;
-        det.insertAdjacentHTML('beforeend', connHtml);
+        const html = `<table class="w-full text-sm text-left mb-4"><thead>
+          <tr><th>Address</th><th>Hop</th><th>%</th><th>Labels</th><th>Flag</th></tr>
+        </thead><tbody>
+        ${w.connected.map(c=>`
+          <tr>
+            <td>${c.address}</td>
+            <td>${c.hop}</td>
+            <td>${c.prob}%</td>
+            <td>${c.labels.join(', ')}</td>
+            <td><span class="inline-block w-2 h-2 rounded-full ${c.flag==='red'?'bg-red-500':'bg-green-500'}"></span></td>
+          </tr>`).join('')}
+        </tbody></table>`;
+        det.insertAdjacentHTML('beforeend', html);
       }
 
-      // Transaction chart
+      // transaction chart
       if (Array.isArray(w.transactions) && w.transactions.length) {
         det.insertAdjacentHTML('beforeend', '<canvas id="txChart" class="w-full h-48 mb-4"></canvas>');
         const ctx = document.getElementById('txChart').getContext('2d');
         new Chart(ctx, {
           type: 'line',
           data: {
-            labels: w.transactions.map(t=>new Date(t.ts*1000).toISOString().substr(11, 5)),
-            datasets: [{ label:'Value', data: w.transactions.map(t=>t.value), fill:false, tension:0.3 }]
+            labels: w.transactions.map(t=>new Date(t.ts*1000).toLocaleTimeString()),
+            datasets: [{ label:'Value', data:w.transactions.map(t=>t.value), fill:false, tension:0.3 }]
           },
-          options: { scales:{ x:{ display:true }, y:{ display:true } } }
+          options:{ scales:{ x:{ display:true }, y:{ display:true } } }
         });
       }
 
-      // Chat
+      // categories
+      if (Array.isArray(w.categories) && w.categories.length) {
+        const catHtml = `<div class="mb-4">
+          <h4 class="font-semibold text-lg text-gray-200 mb-1">Categories</h4>
+          <ul class="list-disc list-inside text-gray-300">
+            ${w.categories.map(c=>`<li>${c}</li>`).join('')}
+          </ul>
+        </div>`;
+        det.insertAdjacentHTML('beforeend', catHtml);
+      }
+
+      // potential categories
+      if (Array.isArray(w.potentialCategories) && w.potentialCategories.length) {
+        const potHtml = `<div class="mb-4">
+          <h4 class="font-semibold text-lg text-gray-200 mb-1">Potential Categories</h4>
+          <table class="w-full text-sm text-left text-gray-300"><thead>
+            <tr><th>Category</th><th>Confidence</th></tr>
+          </thead><tbody>
+            ${w.potentialCategories.map(p=>`
+              <tr>
+                <td>${p.category}</td>
+                <td>${(p.prob*100).toFixed(1)}%</td>
+              </tr>`).join('')}
+          </tbody></table>
+        </div>`;
+        det.insertAdjacentHTML('beforeend', potHtml);
+      }
+
+      // behaves like
+      if (Array.isArray(w.behavesLike) && w.behavesLike.length) {
+        const bioHtml = `<div class="mb-4">
+          <h4 class="font-semibold text-lg text-gray-200 mb-1">Behaves Like</h4>
+          <table class="w-full text-sm text-left text-gray-300"><thead>
+            <tr><th>Wallet</th><th>Prob</th><th>Categories</th></tr>
+          </thead><tbody>
+            ${w.behavesLike.map(b=>`
+              <tr>
+                <td>${b.address}</td>
+                <td>${(b.prob*100).toFixed(1)}%</td>
+                <td>${b.categories.join(', ')}</td>
+              </tr>`).join('')}
+          </tbody></table>
+        </div>`;
+        det.insertAdjacentHTML('beforeend', bioHtml);
+      }
+
+      // chat
       w.chat = await loadChat(addr);
-      renderChat();
+      historyEl.innerHTML = '';
+      w.chat.forEach(m=> {
+        const d = document.createElement('div');
+        d.textContent = (m.from==='user'?'You: ':'AI: ')+m.text;
+        historyEl.append(d);
+      });
+      historyEl.scrollTop = historyEl.scrollHeight;
+
+      // re-render list to update dots
       renderList();
     }
 
-    function renderChat() {
-      historyEl.innerHTML = '';
-      const w = wallets.find(w=>w.address===activeAddr) || {chat:[]};
-      w.chat.forEach(m => { const d=document.createElement('div'); d.textContent=(m.from==='user'?'You: ':'AI: ')+m.text; historyEl.append(d); });
-      historyEl.scrollTop = historyEl.scrollHeight;
+    // --- add & import wallets ---
+    function addWallet(addr) {
+      if (!addr || wallets.some(w=>w.address===addr)) return;
+      wallets.push({ address:addr, status:'new', chat:[], connected:[], transactions:[], categories:[], potentialCategories:[], behavesLike:[] });
+      saveWallets(wallets);
+      renderList();
     }
-
-    // --- add + import ---
-    function addWallet(addr) { if(!addr||wallets.some(w=>w.address===addr))return; wallets.push({address:addr, status:'new', chat:[], connected:[], transactions:[]}); renderList(); }
     btnAdd.onclick = ()=>{ addWallet(txtAdd.value.trim()); txtAdd.value=''; };
-    fileInput.onchange = e=>{ const f=e.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=()=>r.result.split(/\r?\n/).map(l=>l.trim()).filter(l=>l).forEach(addWallet); r.readAsText(f); };
+    fileInput.onchange = e=> {
+      const f = e.target.files[0]; if (!f) return;
+      const r = new FileReader();
+      r.onload = ()=> r.result.split(/\r?\n/).map(l=>l.trim()).filter(l=>l).forEach(addWallet);
+      r.readAsText(f);
+    };
 
-    // --- chat send ---
-    chatBtn.onclick = async ()=>{ const text=chatTxt.value.trim(); if(!activeAddr||!text)return; const w=wallets.find(w=>w.address===activeAddr); w.chat.push({from:'user', text}); w.chat.push({from:'ai', text:'Echo: '+text}); w.summary=`Last asked: "${text}"`; await saveWallets(wallets); await saveChat(activeAddr,w.chat); renderList(); await selectWallet(activeAddr); chatTxt.value=''; };
-
-    // init
+    // Init
     renderList();
+
   })();
   </script>
 </body>
